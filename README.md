@@ -1,5 +1,5 @@
 # Definition
-In this projects we shall be exploring storage solutions and systems used by the backend of a software application or system. The backend of an application is responsible for processing data, executing business logic, and storing and retrieving information
+In this projects we explored storage solutions and systems used by the backend of a software application or system. The backend of an application is responsible for processing data, executing business logic, and storing and retrieving information
 
 ---
 
