@@ -5,7 +5,7 @@ CREATE PROCEDURE ComputeAverageScoreForUser(
 	IN user_id INTEGER
 )
 BEGIN
-	DECLARE total_score DECIMAL(10,2);
+	DECLARE total_score INTEGER;
 	DECLARE total_corrections INTEGER;
 
 	SELECT SUM(score) INTO total_score
