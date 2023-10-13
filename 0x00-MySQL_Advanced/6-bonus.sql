@@ -7,10 +7,17 @@ CREATE PROCEDURE AddBonus(
 	IN score INTEGER
 )
 BEGIN
-	IF NOT EXISTS(SELECT name FROM projects WHERE name=project_name) THEN
-		INSERT INTO projects (name) VALUES (project_name);
-	END IF
-	INSERT INTO corrections (user_id, Project_id, score)
-	VALUES (user_id, (SELECT id FROM projects WHERE name=project_name), score);
+	DECLARE project_id INTEGER;
+	SELECT id INTO project_id
+	FROM projects
+	WHERE name=project_name;
+
+	IF project_id IS NULL THEN
+		INSERT INTO projects (name)
+		VALUES (project_name);
+		SET project_id = LAST_INSERT_ID();
+	END IF;
+	INSERT INTO corrections (user_id, project_id, score)
+	VALUES (user_id, project_id, score);
 END ; $$
 DELIMITER ;
