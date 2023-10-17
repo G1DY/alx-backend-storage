@@ -13,7 +13,7 @@ def log_stats(mongo_collection, option=None):
     print("Methods:")
     for method in ["GET", "POST", "PUT", "PATCH", "DELETE"]:
         count = mongo_collection.count_documents({"method": method})
-        print(f"{\tmethod {method}: {count}")
+        print(f"\tmethod {method}: {count}")
 
     number_of_gets = mongo_collection.count_documents(
         {"method": "GET", "path": "/status"})
@@ -22,4 +22,4 @@ def log_stats(mongo_collection, option=None):
 
 if __name__ == "__main__":
     mongo_collection = MongoClient('mongodb://127.0.0.1:27017').logs.nginx
-    log_nginx_stats(mongo_collection)
+    log_stats(mongo_collection)
