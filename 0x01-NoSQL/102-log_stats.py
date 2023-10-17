@@ -19,16 +19,25 @@ def log_stats(mongo_collection, option=None):
         {"method": "GET", "path": "/status"})
     print(f"{number_of_gets} status check")
 
-    pipeline = [
-        {"$group": {"_id": "$ip", "count": {"$sum": 1}}},
-        {"$sort": {"count": -1}},
-        {"$limit": 10}
-    ]
-
-    top_ips = mongo_collection.aggregate(pipeline)
-    print("Top 10 IPs:")
-    for index, ip_info in enumerate(top_ips, start=1):
-        print(f"\t#{index}: IP {ip_info['_id']} - Count: {ip_info['count']}")
+def print_top_ips(server_collection):
+    """prints statistics about the top 10 HTTP IPs in a collection"""
+    print('IPs:')
+    request_logs = server_collection.aggregate(
+        [
+            {
+                "$group": {"_id": "$ip", "totalRequests": {"$sum": 1}}
+                },
+            {
+                "$sort": {"totalRequests": -1}
+                },
+            {
+                "$limit": 10
+                },
+            ])
+    for request_log in request_logs:
+        ip = request_log["_id"]
+        ip_requests_count = request_log["totalRequests"]
+        print("\t{}: {}".format(ip, ip_requests_count))
 
 
 if __name__ == "__main__":
