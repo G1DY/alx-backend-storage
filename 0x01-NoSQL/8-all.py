@@ -10,3 +10,7 @@ def list_all(mongo_collection):
 
     documents = mongo_collections.find()
     return [document for document in documents]
+
+
+if __name__ == "__main__":
+    list_all(mongo_collection)
