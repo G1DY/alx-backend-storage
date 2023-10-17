@@ -5,12 +5,8 @@ import pymongo
 
 def list_all(mongo_collection):
     """lists all documents in a collection"""
-    if not mongo_collection:
+    if mongo_collection is None:
         return []
 
-    documents = mongo_collections.find()
+    documents = mongo_collection.find()
     return [document for document in documents]
-
-
-if __name__ == "__main__":
-    list_all(mongo_collection)
