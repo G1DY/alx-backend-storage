@@ -19,6 +19,7 @@ def log_stats(mongo_collection, option=None):
         {"method": "GET", "path": "/status"})
     print(f"{number_of_gets} status check")
 
+
 def print_top_ips(server_collection):
     """prints statistics about the top 10 HTTP IPs in a collection"""
     print('IPs:')
