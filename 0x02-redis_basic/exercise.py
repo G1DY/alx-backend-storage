@@ -46,10 +46,8 @@ class Cache:
         """get method that take a key string argument
            and an optional Callable argument named fn
         """
-        value = self._redis.get(key)
-        if fn:
-            value = fn(value)
-        return value
+        data = self._redis.get(key)
+        return fn(data) if fn is not None else data
 
     def get_str(self, key: str) -> str:
         """parametrizes Cache.get with the correct conversion function"""
