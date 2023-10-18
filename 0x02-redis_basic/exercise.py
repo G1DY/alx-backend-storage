@@ -22,85 +22,42 @@ from functools import wraps
 from typing import Union, Callable, Optional
 
 
-def call_count(method: Callable) -> Callable:
-    """returns a Callable"""
+def count_calls(method: Callable) -> Callable:
+    """A decorator to count how many times a method is called."""
     key = method.__qualname__
 
     @wraps(method)
     def wrapper(self, *args, **kwargs):
-        """wrapper for decorated function"""
+        # Increment the count for the method key in Redis
         self._redis.incr(key)
+        # Call the original method and return its result
         return method(self, *args, **kwargs)
 
     return wrapper
 
 
-def call_history(method: Callable) -> Callable:
-    """store the history of inputs and outputs"""
-    @wraps(method)
-    def wrapper(self, *args, **kwargs):
-        """wrapper for the decorated function"""
-        input_str = str(args)
-        self._redis.rpush(f"{method.__qualname__}:inputs", input_str)
-        output_str = str(method(self, *args, **kwargs))
-        self._redis.rpush(f"{method.__qualname__}:outputs", output_str)
-        return output_str
-
-    return wrapper
-
-
-def replay(fn: Callable):
-    """display the history of calls of a particular function"""
-    r = redis.Redis()
-    function_name = fn.__qualname__
-    value = r.get(function_name)
-    try:
-        value = int(value.decode("utf-8"))
-    except Exception:
-        value = 0
-
-    print(f"{function_name} was called {value} times:")
-    inputs = r.lrange(f"{function_name}:inputs", 0, -1)
-    outputs = r.lrange(f"{function_name}:outputs", 0, -1)
-
-    for input_str, output_str in zip(inputs, outputs):
-        input_str = input_str.decode("utf-8")
-        output_str = output_str.decode("utf-8")
-        print(f"{function_name}({input_str}) -> {output_str}")
-
-
 class Cache:
-    """declares a cache redis class"""
     def __init__(self):
-        """stores an instance and flush"""
         self._redis = redis.Redis(host='localhost', port=6379, db=0)
         self._redis.flushdb()
 
-    @call_history
-    @call_count
+    @count_calls  # Decorate the store method with count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
-        """takes a data argument and returns a string"""
         rkey = str(uuid4())
         self._redis.set(rkey, data)
         return rkey
 
-    def get(self, key: str,
-            fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
-        """get method that take a key string argument
-           and an optional Callable argument named fn
-        """
+    def get(self, key: str, fn: Callable = None) -> Union[str, bytes, int, float]:
         value = self._redis.get(key)
         if fn:
             value = fn(value)
         return value
 
     def get_str(self, key: str) -> str:
-        """parametrizes cache.get with the correct conversion function"""
         value = self._redis.get(key)
         return value.decode("utf-8")
 
     def get_int(self, key: str) -> int:
-        """parametrizes cache.get with the correct conversion function"""
         value = self._redis.get(key)
         try:
             value = int(value.decode("utf-8"))
