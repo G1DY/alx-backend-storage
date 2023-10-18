@@ -42,7 +42,7 @@ class Cache:
         return rkey
 
     def get(self, key: str,
-            fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
+            fn: Optional[callable] = None) -> Union[str, bytes, int, float]:
         """get method that take a key string argument
            and an optional Callable argument named fn
         """
