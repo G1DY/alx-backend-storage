@@ -42,17 +42,25 @@ class Cache:
         return rkey
 
     def get(self, key: str,
-            fn: Optional[callable] = None) -> Union[str, bytes, int, float]:
+            fn: Optional[Callable] = None) -> Union[str, bytes, int, float]:
         """get method that take a key string argument
            and an optional Callable argument named fn
         """
-        data = self._redis.get(key)
-        return fn(data) if fn is not None else data
+        value = self._redis.get(key)
+        if fn:
+            value = fn(value)
+        return value
 
     def get_str(self, key: str) -> str:
-        """parametrizes Cache.get with the correct conversion function"""
-        return self.get(key, lambda x: x.decode('utf-8'))
+        """parametrizes cache.get with the correct conversion function"""
+        value = self._redis.get(key)
+        return value.decode("utf-8")
 
     def get_int(self, key: str) -> int:
-        """parametrizes Cache.get with the correct conversion function"""
-        return self.get(key, lambda x: int(x))
+        """parametrizes cache.get with the correct conversion function"""
+        value = self._redis.get(key)
+        try:
+            value = int(value.decode("utf-8"))
+        except Exception:
+            value = 0
+        return value
