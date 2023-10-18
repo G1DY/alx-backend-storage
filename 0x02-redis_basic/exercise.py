@@ -22,10 +22,12 @@ from functools import wraps
 from typing import Union, Callable, Optional
 
 
+
 def replay(fn: Callable):
     r = redis.Redis()
     function_name = fn.__qualname__
-    value = r.get(function_name)
+    count_key = f"{function_name}:count"
+    value = r.get(count_key)
     try:
         value = int(value.decode("utf-8"))
     except Exception:
@@ -33,10 +35,13 @@ def replay(fn: Callable):
 
     print(f"{function_name} was called {value} times:")
     
-    inputs = r.lrange(f"{function_name}:inputs", 0, -1)
-    outputs = r.lrange(f"{function_name}:outputs", 0, -1)
+    inputs_key = f"{function_name}:inputs"
+    outputs_key = f"{function_name}:outputs"
+    
+    inputs = r.lrange(inputs_key, 0, -1)
+    outputs = r.lrange(outputs_key, 0, -1)
 
     for input_str, output_str in zip(inputs, outputs):
         input_str = input_str.decode("utf-8")
         output_str = output_str.decode("utf-8")
-        print(f"{function_name}({input_str}) -> {output_str}")
+        print(f"{function_name}(*{input_str}) -> {output_str}")
