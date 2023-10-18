@@ -2,6 +2,28 @@
 """declares a redis class and methodS"""
 import redis
 from uuid import uuid4
+from functools import wraps
+from typing import Union
+
+
+def call_history(fn):
+    """decorator to track method call history"""
+    @wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        """returns the wrapper"""
+        result = fn(self, *args, **kwargs)
+        self._redis.lpush(f"{fn.__name__}_history", result)
+        return result
+    return wrapper
+
+def call_count(fn):
+    """decorator to track method call history"""
+    @wraps(fn)
+    def wrapper(self, *args, **kwargs):
+        """returns the wrapper"""
+        self._redis.incr(f"{fn.__name__}_count")
+        return fn(self, *args, **kwargs)
+    return wrapper
 
 
 class Cache:
