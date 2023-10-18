@@ -51,16 +51,10 @@ class Cache:
             value = fn(value)
         return value
 
-    def get_str(self, key: str):
+    def get_str(self, key: str) -> str:
         """parametrizes Cache.get with the correct conversion function"""
-        value = self._redis.get(key, fn=str)
-        return value.decode("utf-8")
+        return self.get(key, lambda x: x.decode('utf-8'))
 
     def get_int(self, key: str) -> int:
         """parametrizes Cache.get with the correct conversion function"""
-        value = self._redis.get(key, fn=int)
-        try:
-            value = int(value.decode("utf-8"))
-        except Exception:
-            value = 0
-        return value
+        return self.get(key, lambda x: int(x))
