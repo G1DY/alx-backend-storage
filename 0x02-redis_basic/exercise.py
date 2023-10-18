@@ -54,8 +54,14 @@ class Cache:
 
     def get_str(self, key: str):
         """parametrizes Cache.get with the correct conversion function"""
-        return self.get(key, fn=str)
+        value = self.get(key, fn=str)
+        return value.decode("utf-8")
 
     def get_int(self, key: str):
         """parametrizes Cache.get with the correct conversion function"""
-        return self.get(key, fn=int)
+        value = self.get(key, fn=int)
+        try:
+            value = int(value.decode("utf-8"))
+        except Exception:
+            value = 0
+        return value
