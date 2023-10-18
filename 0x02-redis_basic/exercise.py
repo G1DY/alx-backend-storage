@@ -74,3 +74,7 @@ TEST_CASES = {
     123: int,
     "bar": lambda d: d.decode("utf")
     }
+
+for value, fn in TEST_CASES.items():
+    key = cache.store(value)
+    assert cache.get(key, fn=fn) == value
