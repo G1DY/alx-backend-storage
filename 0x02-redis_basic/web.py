@@ -1,37 +1,38 @@
 #!/usr/bin/env python3
-"""
-   Implementing an expiring web cache and tracker 
-"""
+"""implement redis that retrieves html"""
 import requests
 import redis
 from functools import wraps
 
 
-r = redis.Redis()
+# Initialize a Redis connection
+redis_conn = redis.StrictRedis(host='localhost', port=6379, db=0)
 
 
-def access_count(method):
-    """decorator for our function"""
+def cache_result(method):
     @wraps(method)
     def wrapper(url):
-        """wrapper function"""
-        key = "cached:" + url
-        cached_value = r.get(key)
-        if cached_value:
-            return cached_value.decode("utf-8")
+        # Check if the result is cached
+        cached_result = redis_conn.get(f"cache:{url}")
+        if cached_result:
+            return cached_result.decode("utf-8")
 
-        key_count = "count:" + url
-        html_content = method(url)
+        # If not cached, fetch the result and cache it
+        result = method(url)
+        redis_conn.setex(f"cache:{url}", 10, result)
+        return result
 
-        r.incr(key_count)
-        r.set(key, html_content, ex=10)
-        r.expire(key, 10)
-        return html_content
     return wrapper
 
+def get_page(url):
+    # Simulate slow response from http://slowwly.robertomurray.co.uk
+    slow_url = f"http://slowwly.robertomurray.co.uk/delay/5000/url/{url}"
 
-@access_count
-def get_page(url: str) -> str:
-    """obtains html content"""
-    results = requests.get(url)
-    return results.text
+    response = requests.get(slow_url)
+    if response.status_code == 200:
+        return response.text
+    else:
+        return f"Failed to fetch URL: {url}"
+
+# Apply caching decorator
+get_page = cache_result(get_page)
