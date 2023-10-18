@@ -46,35 +46,21 @@ class Cache:
         """get method that take a key string argument
            and an optional Callable argument named fn
         """
-        data = self._redis.get(key)
-        if data is not None:
-            if fn is not None:
-                return fn(data)
-            return data
-        return None
+        value = self._redis.get(key)
+        if fn:
+            value = fn(value)
+        return value
 
     def get_str(self, key: str):
         """parametrizes Cache.get with the correct conversion function"""
-        value = self.get(key, fn=str)
+        value = self._redis.get(key, fn=str)
         return value.decode("utf-8")
 
-    def get_int(self, key: str):
+    def get_int(self, key: str) -> int:
         """parametrizes Cache.get with the correct conversion function"""
-        value = self.get(key, fn=int)
+        value = self._redis.get(key, fn=int)
         try:
             value = int(value.decode("utf-8"))
         except Exception:
             value = 0
         return value
-
-cache = Cache()
-
-TEST_CASES = {
-    b"foo": None,
-    123: int,
-    "bar": lambda d: d.decode("utf")
-    }
-
-for value, fn in TEST_CASES.items():
-    key = cache.store(value)
-    assert cache.get(key, fn=fn) == value
