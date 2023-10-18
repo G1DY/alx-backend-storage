@@ -40,3 +40,22 @@ class Cache:
         rkey = str(uuid4())
         self._redis.set(rkey, data)
         return rkey
+
+    def get(self, key: str, fn: Callable = None):
+        """get method that take a key string argument
+           and an optional Callable argument named fn
+        """
+        data = self._redis.get(key)
+        if data is not None:
+            if fn is not None:
+                return fn(data)
+            return data
+        return None
+
+    def get_str(self, key: str):
+        """parametrizes Cache.get with the correct conversion function"""
+        return self.get(key, fn=str)
+
+    def get_int(self, key: str):
+        """parametrizes Cache.get with the correct conversion function"""
+        return self.get(key, fn=int)
