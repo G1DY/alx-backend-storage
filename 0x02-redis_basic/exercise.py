@@ -15,14 +15,11 @@
 
    In this tasks, we will implement a replay function to display the history
    of calls of a particular function.
-
-
-
 """
 import redis
 from uuid import uuid4
 from functools import wraps
-from typing import Union
+from typing import Union, Callable, Optional
 
 
 def count_calls(method: Callable) -> Callable:
@@ -43,8 +40,8 @@ def call_history(method: Callable) -> Callable:
     @wraps(method)
     def wrapper(self, *args, **kwargs):
         """wrapper for the decorated function"""
-        input = str(args)
-        self._redis.rpush(method.__qualname__ + ":inputs", input)
+        input_str = str(args)
+        self._redis.rpush(f"{method.__qualname__}:inputs", input_str)
         output = str(method(self, *args, **kwargs))
         self._redis.rpush(method.__qualname__ + ":outputs", output)
         return output
