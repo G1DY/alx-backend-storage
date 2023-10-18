@@ -50,25 +50,6 @@ def call_history(method: Callable) -> Callable:
 
     return wrapper
 
-def replay(fn: Callable):
-    r = redis.Redis()
-    function_name = fn.__qualname__
-    value = r.get(function_name)
-    try:
-        value = int(value.decode("utf-8"))
-    except Exception:
-        value = 0
-
-    print(f"{function_name} was called {value} times:")
-
-    inputs = r.lrange(f"{function_name}:inputs", 0, -1)
-    outputs = r.lrange(f"{function_name}:outputs", 0, -1)
-
-    for input_str, output_str in zip(inputs, outputs):
-        input_str = input_str.decode("utf-8")
-        output_str = output_str.decode("utf-8")
-        print(f"{function_name}({input_str}) -> {output_str}")
-
 class Cache:
     def __init__(self):
         self._redis = redis.Redis(host='localhost', port=6379, db=0)
