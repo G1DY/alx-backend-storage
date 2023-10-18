@@ -22,7 +22,7 @@ from functools import wraps
 from typing import Union, Callable, Optional
 
 
-def count_calls(method: Callable) -> Callable:
+def call_count(method: Callable) -> Callable:
     """returns a Callable"""
     key = method.__qualname__
 
@@ -42,9 +42,9 @@ def call_history(method: Callable) -> Callable:
         """wrapper for the decorated function"""
         input_str = str(args)
         self._redis.rpush(f"{method.__qualname__}:inputs", input_str)
-        output = str(method(self, *args, **kwargs))
-        self._redis.rpush(method.__qualname__ + ":outputs", output)
-        return output
+        output_str = str(method(self, *args, **kwargs))
+        self._redis.rpush(f"{method.__qualname__}:outputs", output_str)
+        return output_str
 
     return wrapper
 
@@ -59,27 +59,14 @@ def replay(fn: Callable):
     except Exception:
         value = 0
 
-    # print(f"{function_name} was called {value} times")
-    print("{} was called {} times:".format(function_name, value))
-    # inputs = r.lrange(f"{function_name}:inputs", 0, -1)
-    inputs = r.lrange("{}:inputs".format(function_name), 0, -1)
+    print(f"{function_name} was called {value} times:")
+    inputs = r.lrange(f"{function_name}:inputs", 0, -1)
+    outputs = r.lrange(f"{function_name}:outputs", 0, -1)
 
-    # outputs = r.lrange(f"{function_name}:outputs", 0, -1)
-    outputs = r.lrange("{}:outputs".format(function_name), 0, -1)
-
-    for input, output in zip(inputs, outputs):
-        try:
-            input = input.decode("utf-8")
-        except Exception:
-            input = ""
-
-        try:
-            output = output.decode("utf-8")
-        except Exception:
-            output = ""
-
-        # print(f"{function_name}(*{input}) -> {output}")
-        print("{}(*{}) -> {}".format(function_name, input, output))
+    for input_str, output_str in zip(inputs, outputs):
+        input_str = input_str.decode("utf-8")
+        output_str = output_str.decode("utf-8")
+        print(f"{function_name}({input_str}) -> {output_str}")
 
 
 class Cache:
