@@ -35,4 +35,7 @@ def get_page(url: str) -> str:
 
 
 if __name__ == "__main__":
-    get_page('http://slowwly.robertomurray.co.uk')
+    url = 'http://slowwly.robertomurray.co.uk'  # URL for testing, you can replace it with other URLs
+    page_content = get_page(url)
+    print("HTML Content:")
+    print(page_content)
