@@ -16,12 +16,13 @@ def response_cached_or_not(fn: Callable) -> Callable:
     @wraps(fn)
     def wrapper(url):
         """returns the decorator"""
-        redis_client.incr(f"count:{url}")
+        redis_client.incr(f"count:{url}")  # Increment the count for the URL
+        count = int(redis_client.get(f"count:{url}") or 0)
         cached_response = redis_client.get(f"cached:{url}")
         if cached_response:
             return cached_response.decode('utf-8')
         result = fn(url)
-        redis_client.setex(f"cached:{url}", 10, result)
+        redis_client.setex(f"cached:{url}", 10, result)  # Cache the result with an expiration time of 10 seconds
         return result
     return wrapper
 
