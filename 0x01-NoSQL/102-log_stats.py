@@ -35,7 +35,7 @@ def log_stats():
         if i == 10:
             break
         print(f"\t{j.get('_id')}: {j.get('count')}")
-        i++
+        i += 1
 
 
 if __name__ == "__main__":
