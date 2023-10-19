@@ -30,11 +30,4 @@ def response_cached_or_not(fn: Callable) -> Callable:
 @response_cached_or_not
 def get_page(url: str) -> str:
     """makes http request to a certain end point"""
-    return get(url).text
-
-
-if __name__ == "__main__":
-    url = 'http://slowwly.robertomurray.co.uk'
-    page_content = get_page(url)
-    print("HTML Content:")
-    print(page_content)
+    return get(url).txt
